@@ -35,7 +35,9 @@ func main() {
 
 	result := map[string]string{}
 	curDir, _ := os.Getwd()
-	process(curDir, filters, result)
+	if err := process(curDir, filters, result); err != nil {
+		fmt.Fprintf(os.Stderr, "error occured during process: %v", err)
+	}
 
 	if len(result) > 0 {
 		fmt.Println("Found Missing Dependencies:")
@@ -111,7 +113,9 @@ func process(dirPath string, filters []string, result map[string]string) error {
 				} else {
 					fmt.Printf("downloaded %v\n", dep)
 					subDir := filepath.Join(gopath, "pkg", "mod", dep)
-					process(subDir, filters, result)
+					if err := process(subDir, filters, result); err != nil {
+						return err
+					}
 				}
 			}
 		}
