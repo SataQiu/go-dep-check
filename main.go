@@ -33,14 +33,14 @@ func main() {
 		}
 	}
 
-	result := map[string]struct{}{}
+	result := map[string]string{}
 	curDir, _ := os.Getwd()
 	process(curDir, filters, result)
 
 	if len(result) > 0 {
 		fmt.Println("Found Missing Dependencies:")
-		for path := range result {
-			fmt.Println(path)
+		for path, version := range result {
+			fmt.Printf("%s@%s\n", path, version)
 		}
 	} else {
 		fmt.Println("Congratulations, No missing dependencies found.")
@@ -52,13 +52,13 @@ func main() {
 			panic(err)
 		}
 		defer file.Close()
-		for path := range result {
-			file.WriteString(fmt.Sprintf("%s\n", path))
+		for path, version := range result {
+			file.WriteString(fmt.Sprintf("%s@%s\n", path, version))
 		}
 	}
 }
 
-func process(dirPath string, filters []string, result map[string]struct{}) error {
+func process(dirPath string, filters []string, result map[string]string) error {
 	return filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if info != nil && info.IsDir() {
 			return nil
@@ -107,7 +107,7 @@ func process(dirPath string, filters []string, result map[string]struct{}) error
 				output, err := cmd.Output()
 				if err != nil {
 					fmt.Printf("failed to download %v, error %v, output %v\n", dep, err, string(output))
-					result[m.Path] = struct{}{}
+					result[m.Path] = m.Version
 				} else {
 					fmt.Printf("downloaded %v\n", dep)
 					subDir := filepath.Join(gopath, "pkg", "mod", dep)
