@@ -60,7 +60,7 @@ func main() {
 
 func process(dirPath string, filters []string, result map[string]struct{}) error {
 	return filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
+		if info != nil && info.IsDir() {
 			return nil
 		}
 		if filepath.Base(path) == "go.mod" {
